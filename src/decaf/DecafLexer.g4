@@ -22,6 +22,8 @@ ID  :
 
 WS_ : (' ' | '\n' ) -> skip;
 
+CHARACTER : '\''(' '..'~')'\'';
+
 SL_COMMENT : '//' (~'\n')* '\n' -> skip;
 
 CHAR : '\'' (ESC|~'\'') '\'';
