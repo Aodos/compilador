@@ -17,27 +17,25 @@ tokens
 LCURLY : '{';
 RCURLY : '}';
 
-ID  :
-  ('_'|LETRAS)(LETRAS|DIGITOS|'_')+;
+PALAVRASRESERVADAS : 'boolean' | 'break' | 'callout' | 'class' | 'continue' | 
+'else' | 'for' | 'int' | 'return' | 'void' | 'if';
+
+BOOLEAN : 'true'|'false';
+
+ID  : 
+  ('_'|LETRAS)(LETRAS|DIGITOS|'_')*;
 
 CHAR : '\'' (' '..'!' | '#'..'&' | '('..'[' | ']'..'~' | ESC ) '\'';
 
 STRING : '"' (ESC)* '"';
 
-NUMEROS : HEXADECIMAL;
+NUMEROS : ( HEXAPRFIXO ('0'..'9'|'a'..'f'|'A'..'F')+) | (DIGITOS)+ ;
 
-//Arrumando
-PALAVRASRESERVADAS : 'boolean' | 'break' | 'callout' | 'class' | 'continue' | 
-'else' | 'false' | 'for' | 'int' | 'return' | 'true' | 'void';
-
-fragment
-HEXADECIMAL : PREFIXOHEXADECIMAL (DIGITOS|LETRAS)+;
+OP : '+' | '-' | '*' | '<' | '<=' | '!=' | '&&' | ',' | ';' | '[' | '|' | '=' | '('
+| ')' | ']' | '[' | '>' | '>=';
 
 fragment
-DECIMAL : (DIGITOS)+;
-
-fragment
-PREFIXOHEXADECIMAL : '0x';
+HEXAPRFIXO : '0x' ;
 
 fragment
 LETRAS : ('a'..'z' | 'A'..'Z');
@@ -50,7 +48,7 @@ ESC :  '\\' ('\\' | '\"' | '\'' | 't' | 'n');
 
 SL_COMMENT : '//' (~'\n')* '\n' -> skip;
 
-WS_ : (' ' | '\n' ) -> skip;
+WS_ : (' ' | '\n' | '\t') -> skip;
 
 
 
