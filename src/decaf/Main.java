@@ -26,24 +26,36 @@ class Main {
         			{
 		        		for (token=lexer.nextToken(); token.getType()!=Token.EOF; token=lexer.nextToken())
 		        		{
+				
 		        			String type = "";
 		        			String text = token.getText();
-
+							
 		        			switch (token.getType())
 		        			{
 		        			case DecafLexer.ID:
 		        				type = " IDENTIFIER";
 		        				break;
-		        			case DecafLexer.CHARACTER:
+		        			case DecafLexer.CHAR:
 		        				type = " CHARLITERAL";
 		        				break;
+							case DecafLexer.NUMEROS:
+								type = " INTLITERAL";
+								break;
+							case DecafLexer.PALAVRASRESERVADAS:
+								type = "";
+								break;
 		        			}
+										
+							
+							
 		        			System.out.println (token.getLine() + type + " " + text);
+							
 		        		}
 		        		done = true;
         			} catch(Exception e) {
         	        	// print the error:
         	            System.out.println(CLI.infile+" "+e);
+						
         	            lexer.skip();
         	        }
         		}
@@ -58,6 +70,7 @@ class Main {
         	
         } catch(Exception e) {
         	// print the error:
+
             System.out.println(CLI.infile+" "+e);
         }
     }

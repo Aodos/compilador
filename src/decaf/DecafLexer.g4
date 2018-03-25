@@ -18,16 +18,39 @@ LCURLY : '{';
 RCURLY : '}';
 
 ID  :
-  ('a'..'z' | 'A'..'Z')+;
+  ('_'|LETRAS)(LETRAS|DIGITOS|'_')+;
 
-WS_ : (' ' | '\n' ) -> skip;
+CHAR : '\'' (' '..'!' | '#'..'&' | '('..'[' | ']'..'~' | ESC ) '\'';
 
-CHARACTER : '\''(' '..'~')'\'';
+STRING : '"' (ESC)* '"';
+
+NUMEROS : HEXADECIMAL;
+
+//Arrumando
+PALAVRASRESERVADAS : 'boolean' | 'break' | 'callout' | 'class' | 'continue' | 
+'else' | 'false' | 'for' | 'int' | 'return' | 'true' | 'void';
+
+fragment
+HEXADECIMAL : PREFIXOHEXADECIMAL (DIGITOS|LETRAS)+;
+
+fragment
+DECIMAL : (DIGITOS)+;
+
+fragment
+PREFIXOHEXADECIMAL : '0x';
+
+fragment
+LETRAS : ('a'..'z' | 'A'..'Z');
+
+fragment
+DIGITOS : ('0'..'9');
+
+fragment
+ESC :  '\\' ('\\' | '\"' | '\'' | 't' | 'n');
 
 SL_COMMENT : '//' (~'\n')* '\n' -> skip;
 
-CHAR : '\'' (ESC|~'\'') '\'';
-STRING : '"' (ESC|~'"')* '"';
+WS_ : (' ' | '\n' ) -> skip;
 
-fragment
-ESC :  '\\' ('n'|'"');
+
+
