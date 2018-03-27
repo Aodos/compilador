@@ -29,16 +29,17 @@ CHAR : '\'' (COTEUDOCHAR| ESC ) '\'';
 
 STRING : '"' (COTEUDOCHAR+ | ESC)* '"';
 
-NUMEROS : ( HEXAPRFIXO ('0'..'9'|'a'..'f'|'A'..'F')+) | (DIGITOS)+ ;
+NUMEROS :  ( '0x' ('0'..'9'|'a'..'f'|'A'..'F')+) | (DIGITOS)+ ;
 
 OP : '+' | '-' | '*' | '<' | '<=' | '!=' | '&&' | ',' | ';' | '[' | '|' | '=' | '('
 | ')' | ']' | '[' | '>' | '>=';
 
-fragment
-COTEUDOCHAR : (' '..'!' | '#'..'&' | '('..'[' | ']'..'~');
 
 fragment
-HEXAPRFIXO : '0x' ;
+PREFIXOHEXA : '0X';
+
+fragment
+COTEUDOCHAR : (' '..'!' | '#'..'&' | '('..'[' | ']'..'~');
 
 fragment
 LETRAS : ('a'..'z' | 'A'..'Z');
