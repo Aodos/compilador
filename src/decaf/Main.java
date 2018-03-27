@@ -54,9 +54,9 @@ class Main {
 								type = " BOOLEANLITERAL";
 
 								break;
-							default:
+							case DecafLexer.STRING:
 
-								type = "";
+								type = " STRINGLITERAL";
 
 								break;
 		        			}

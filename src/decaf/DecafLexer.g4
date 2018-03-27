@@ -25,14 +25,17 @@ BOOLEAN : 'true'|'false';
 ID  : 
   ('_'|LETRAS)(LETRAS|DIGITOS|'_')*;
 
-CHAR : '\'' (' '..'!' | '#'..'&' | '('..'[' | ']'..'~' | ESC ) '\'';
+CHAR : '\'' (COTEUDOCHAR| ESC ) '\'';
 
-STRING : '"' (ESC)* '"';
+STRING : '"' (COTEUDOCHAR+ | ESC)* '"';
 
 NUMEROS : ( HEXAPRFIXO ('0'..'9'|'a'..'f'|'A'..'F')+) | (DIGITOS)+ ;
 
 OP : '+' | '-' | '*' | '<' | '<=' | '!=' | '&&' | ',' | ';' | '[' | '|' | '=' | '('
 | ')' | ']' | '[' | '>' | '>=';
+
+fragment
+COTEUDOCHAR : (' '..'!' | '#'..'&' | '('..'[' | ']'..'~');
 
 fragment
 HEXAPRFIXO : '0x' ;
