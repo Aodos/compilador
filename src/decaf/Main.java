@@ -31,7 +31,7 @@ class Main {
 		        			String text = token.getText();
 							
 		        			switch (token.getType())
-		        			{
+		        			{								
 		        			case DecafLexer.NUMEROS:
 
 								type = " INTLITERAL";

@@ -17,6 +17,8 @@ tokens
 LCURLY : '{';
 RCURLY : '}';
 
+
+
 PALAVRASRESERVADAS : 'boolean' | 'break' | 'callout' | 'class' | 'continue' | 
 'else' | 'for' | 'int' | 'return' | 'void' | 'if';
 
@@ -29,7 +31,9 @@ CHAR : '\'' (COTEUDOCHAR| ESC ) '\'';
 
 STRING : '"' (COTEUDOCHAR+ | ESC)* '"';
 
-NUMEROS :  ( '0x' ('0'..'9'|'a'..'f'|'A'..'F')+) | (DIGITOS)+ ;
+NUMEROS :  ( '0x' ('0'..'9'|'a'..'f'|'A'..'F')+) | (DIGITOS)+ ~('x');
+
+IGUAL: '==';
 
 OP : '+' | '-' | '*' | '<' | '<=' | '!=' | '&&' | ',' | ';' | '[' | '|' | '=' | '('
 | ')' | ']' | '[' | '>' | '>=';
