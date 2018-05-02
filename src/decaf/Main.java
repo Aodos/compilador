@@ -2,9 +2,17 @@ package decaf;
 
 import java.io.*;
 //import antlr.Token;
+import java.util.Arrays;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.gui.TreeViewer;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import java6035.tools.CLI.*;
 
 class Main {
@@ -24,53 +32,49 @@ class Main {
         		{
         			try
         			{
+        				System.out.println("Para visualizar tipo do token, consultar tabela em skeleton\\java\\decaf\\DecafLexer.tokens");
+        				System.out.println("Linha - ID token - Token");
 		        		for (token=lexer.nextToken(); token.getType()!=Token.EOF; token=lexer.nextToken())
 		        		{
-				
 		        			String type = "";
 		        			String text = token.getText();
-							
+
 		        			switch (token.getType())
-		        			{								
-		        			case DecafLexer.NUMEROS:
-
-								type = " INTLITERAL";
-
-								break;
-
-							case DecafLexer.ID:
-
-								type = " IDENTIFIER";
-
-								break;
-
-							case DecafLexer.CHAR:
-
-								type = " CHARLITERAL";
-
-								break;
+		        			{
 							case DecafLexer.BOOLEAN:
-
 								type = " BOOLEANLITERAL";
-
+								break;
+							case DecafLexer.ID:
+								type = " IDENTIFIER";
+								break;
+							case DecafLexer.OP_ARITH:
+								type = " OP_ARITH";
+								break;
+							case DecafLexer.OP_RELACIO:
+								type = " OP_RELACIO";
+								break;
+							case DecafLexer.OP_EQUID:
+								type = " OP_EQUID";
+								break;
+							case DecafLexer.OP_COND:
+								type = " OP_COND";
+								break;
+							case DecafLexer.CHAR:
+								type = " CHARLITERAL";
 								break;
 							case DecafLexer.STRING:
-
 								type = " STRINGLITERAL";
-
 								break;
-		        			}
-										
-							
-							
-		        			System.out.println (token.getLine() + type + " " + text);
-							
+							case DecafLexer.INTLITERAL:
+								type = " INTLITERAL";
+								break;
+							}
+		        			System.out.println (token.getLine() +" "+ token.getType() + " " + text);
 		        		}
 		        		done = true;
         			} catch(Exception e) {
         	        	// print the error:
         	            System.out.println(CLI.infile+" "+e);
-						
         	            lexer.skip();
         	        }
         		}
@@ -80,12 +84,41 @@ class Main {
         		DecafLexer lexer = new DecafLexer(new ANTLRInputStream(inputStream));
 				CommonTokenStream tokens = new CommonTokenStream(lexer);
         		DecafParser parser = new DecafParser(tokens);
-                parser.program();
-        	}
+                ParseTree tree = parser.program();
+
+                if (CLI.debug) {
+
+                    System.out.println(tree.toStringTree(parser));
+
+                    JFrame frame = new JFrame("Antlr AST");
+
+                    JPanel panel = new JPanel();
+
+                    TreeViewer viewr = new TreeViewer(Arrays.asList(
+
+                            parser.getRuleNames()),tree);
+
+                    viewr.setScale(1.5);
+
+                    panel.add(viewr);
+
+                    frame.add(panel);
+
+                    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+                    frame.setSize(200,200);
+
+                    frame.setVisible(true);
+
+                }
+
+
+
+            }
+        	
         	
         } catch(Exception e) {
         	// print the error:
-
             System.out.println(CLI.infile+" "+e);
         }
     }
