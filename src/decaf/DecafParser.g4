@@ -46,6 +46,6 @@ expr: location
 	| (INTLITERAL|CHAR|BOOLEAN)
 	| expr (OP_ARITH|OP_RELACIO|OP_EQUID|OP_COND|MAIS|MENOS) expr
 	| MENOS expr
-	| EXCLAMACAO expr
+	| EXCAMACAO expr
 	| EPAR expr DPAR;
 
