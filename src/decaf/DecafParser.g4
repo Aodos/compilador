@@ -16,7 +16,9 @@ program: TK_class LCURLY field_decl* method_decl* RCURLY EOF;
 field_decl: TIPO ID (VIRGULA TIPO ID)* PONTVIRGULA
 	| TIPO ID ECOLC INTLITERAL DCOLC (VIRGULA TIPO ID ECOLC INTLITERAL DCOLC)* PONTVIRGULA ;
 
-method_decl: (TIPO | VOID) ID EPAR (TIPO ID (VIRGULA TIPO ID)*)? DPAR block;
+method_decl: (TIPO | VOID) ID EPAR (parametroMeth_decl)? DPAR block;
+
+parametroMeth_decl: TIPO ID (VIRGULA TIPO ID)*;
 
 block: LCURLY var_decl* statement* RCURLY;
 

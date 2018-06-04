@@ -9,11 +9,61 @@
 package decaf;
 
 import org.antlr.symtab.Scope;
-import org.antlr.symtab.Symbol;
 import org.antlr.symtab.Type;
 
-public class DecafSymbol { // A generic programming language symbol
-    public static enum Type {tINVALID, tVOID, tINT, tFLOAT}
+public class DecafSymbol {
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public Type getTipo() {
+		return tipo;
+	}
+	public void setTipo(Type tipo) {
+		this.tipo = tipo;
+	}
+	public Scope getScopo() {
+		return scopo;
+	}
+	public void setScopo(Scope scopo) {
+		this.scopo = scopo;
+	}
+	private String name;
+	private Type tipo;
+	private Scope scopo;
+	
+	public DecafSymbol(String nome, Type tipo, Scope escopo) {
+		this.name = nome;
+		this.tipo = tipo;
+		this.scopo = escopo;
+	}
+	
+	public static class Tipos implements Type{
+		private String nomeTipo;
+		
+		public Tipos(String nomeTipo) {
+			this.nomeTipo = nomeTipo;
+		}
+		@Override
+		public String getName() {
+			// TODO Auto-generated method stub
+			return nomeTipo;
+		}
+
+		@Override
+		public int getTypeIndex() {
+			// TODO Auto-generated method stub
+			return 0;
+		}
+		
+	}
+	
+	
+	
+	// A generic programming language symbol
+    /*public static enum Type {tINVALID, tVOID, tINT, tFLOAT}
 
     String name;      // All symbols at least have a name
     Type type;
@@ -26,5 +76,5 @@ public class DecafSymbol { // A generic programming language symbol
     public String toString() {
         if ( type!=Type.tINVALID ) return '<'+getName()+":"+type+'>';
         return getName();
-    }
+    }*/
 }
