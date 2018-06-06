@@ -44,8 +44,8 @@ public class CompiladorArthurException extends Exception {
 	}
 	
 	public static class RetornoMetodoException extends CompiladorArthurException{
-		public RetornoMetodoException(String nomeMetodo, String msg) {
-			super("Metodo "+nomeMetodo+msg);
+		public RetornoMetodoException(String nomeMetodo) {
+			super("Metodo "+nomeMetodo+" esta com tipo de retorno errado ou e void e nao deve retornar");
 		}
 	}
 	

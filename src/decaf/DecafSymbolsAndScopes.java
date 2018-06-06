@@ -49,6 +49,8 @@ import decaf.DecafSymbol.Tipos;
  */
 
 public class DecafSymbolsAndScopes extends DecafParserBaseListener {
+	
+	String ultMethDecl = "";
 
 	ParseTreeProperty<Scope> scopes = new ParseTreeProperty<Scope>();
 
@@ -58,24 +60,53 @@ public class DecafSymbolsAndScopes extends DecafParserBaseListener {
 
 	List<Method_declContext> listaMetodos = new ArrayList<DecafParser.Method_declContext>();
 	List<DecafSymbol> listaDeSimboloGeral = new ArrayList<DecafSymbol>();
+	
+	private DecafSymbol retornaSimbolo(String nomeVar) {
+		DecafSymbol retorno = null;
+		
+		Scope aux = currentScope;
+		boolean aux2 = true;
+		
+		
+			while(aux2) {
+				for(DecafSymbol a : listaDeSimboloGeral) {
+					if(a.getName().equals(nomeVar) && a.getScopo().getName().equals(aux.getName())) {
+						retorno = a;
+						break;
+					}	
+				}
+				if(aux.getName().equals(globals.getName())) {
+					aux2 = false;
+				}
+				aux = aux.getEnclosingScope();
+			}
+
+		
+			if(retorno == null) {
+				try {
+					throw new VariavelNaoInstanciadaException(nomeVar);
+				} catch (VariavelNaoInstanciadaException e) {
+					// TODO Auto-generated catch block
+					System.out.println(e.toString());
+					System.exit(0);
+				}
+			}
+		
+		return retorno;
+		
+	}
 
 	@Override
 
 	public void enterProgram(DecafParser.ProgramContext ctx) {
-		System.out.println("---------------------Inicio enterProgram----------------------");
 		globals = new GlobalScope(null);
 		pushScope(globals);
-		System.out.println();
-		System.out.println("---------------------Fim enterProgram-------------------------");
-		System.out.println();
-		System.out.println();
 
 	}
 
 	@Override
 
 	public void exitProgram(DecafParser.ProgramContext ctx) {
-		System.out.println("---------------------Inicio exitProgram------------------");
 
 		System.out.println(globals);
 
@@ -101,21 +132,13 @@ public class DecafSymbolsAndScopes extends DecafParserBaseListener {
 		}
 		// verifica se tem metodo main
 
-		for (DecafSymbol a : listaDeSimboloGeral) {
-			System.out.println(a.getName());
-			System.out.println(a.getScopo());
-		}
-
-		System.out.println();
-		System.out.println("---------------------Fim exitProgram------------------");
-		System.out.println();
-		System.out.println();
 
 	}
 
 	@Override
 	public void enterMethod_decl(DecafParser.Method_declContext ctx) {
-		System.out.println("---------------------Inicio enterMethod_decl------------------");
+		
+		
 
 		String nome = ctx.ID().getText();
 		Type tipo;
@@ -139,96 +162,21 @@ public class DecafSymbolsAndScopes extends DecafParserBaseListener {
 		pushScope(function);
 
 		
-		// verifica se metodo tem que retornar, se sim, verifica se tem return, se nao
-		// tiver = CompiladorArthurException
-		if (!tipo.getName().equals("void")) {
-			if (!(ctx.block().statement().size() < 1)) {
-				if (ctx.block().statement().get(ctx.block().statement().size() - 1 ).RETURN() == null) {
-					try {
-						throw new RetornoMetodoException(nome, " esta sem retorno");
-					} catch (RetornoMetodoException e) {
-						// TODO Auto-generated catch block
-						System.out.println(e.toString());
-						System.exit(0);
-					}
-				}
-			} else {
-				try {
-					throw new RetornoMetodoException(nome, " esta sem retorno");
-				} catch (RetornoMetodoException e) {
-					// TODO Auto-generated catch block
-					System.out.println(e.toString());
-					System.exit(0);
-				}
-			}
-		} else {
-			if (!(ctx.block().statement().size() < 1)) {
-				if (!(ctx.block().statement().get(ctx.block().statement().size() - 1 ).RETURN() == null)) {
-					try {
-						throw new RetornoMetodoException(nome, " do tipo void, nao deve ter retorno");
-					} catch (RetornoMetodoException e) {
-						// TODO Auto-generated catch block
-						System.out.println(e.toString());
-						System.exit(0);
-					}
-				}
-			}
-		}
-
-		// verifica tipo do retorno se for diferente de void
-		System.out.println(tipo.getName());
-		if (!tipo.getName().equals("void")) {
-			
-			if(ctx.block().statement().size() > 1) {
-				if (!tipo.getName().equals(this.getType(ctx.block().statement(ctx.block().statement().size() - 1).expr(ctx.block().statement(ctx.block().statement().size() - 1).expr().size() - 1).expr(0).start.getType()).getName())) {
-					try {
-						throw new RetornoMetodoException(nome, " esta com retorno de tipo diferente do instanciado");
-					} catch (RetornoMetodoException e) {
-						// TODO Auto-generated catch block
-						System.out.println(e.toString());
-						System.exit(0);
-					}
-				}
-			}else if(ctx.block().statement().size() == 1) {
-				if (!tipo.getName().equals(this.getType(ctx.block().statement(0).expr(0).start.getType()).getName())) {
-					try {
-						throw new RetornoMetodoException(nome, " esta com retorno de tipo diferente do instanciado");
-					} catch (RetornoMetodoException e) {
-						// TODO Auto-generated catch block
-						System.out.println(e.toString());
-						System.exit(0);
-					}
-				}
-			}
-			
-			
-			
-		}
-
-		System.out.println();
-
-		System.out.println();
-		System.out.println("---------------------Fim enterMethod_decl---------------------");
-		System.out.println();
-		System.out.println();
+		ultMethDecl = nome;
+		
+		
 	}
 
 	@Override
 
 	public void exitMethod_decl(DecafParser.Method_declContext ctx) {
-		System.out.println("---------------------Inicio exitMethod_decl------------------");
 
 		
 		popScope();
-		System.out.println();
-		System.out.println("---------------------Fim exitMethod_decl---------------------");
-		System.out.println();
-		System.out.println();
 	}
 
 	@Override
 	public void enterParametroMeth_decl(ParametroMeth_declContext ctx) {
-		System.out.println("---------------------Inicio enterParametroMeth_decl------------------");
 
 		for (int i = 0; i < ctx.ID().size(); i++) {
 			String nome = ctx.ID().get(i).getText();
@@ -241,52 +189,32 @@ public class DecafSymbolsAndScopes extends DecafParserBaseListener {
 
 		}
 
-		System.out.println();
-		System.out.println("---------------------Fim enterParametroMeth_decl---------------------");
-		System.out.println();
-		System.out.println();
 	}
 
 	@Override
 	public void exitParametroMeth_decl(ParametroMeth_declContext ctx) {
 		// TODO Auto-generated method stub
-		System.out.println("---------------------Inicio exitParametroMeth_decl------------------");
 
-		System.out.println();
-		System.out.println("---------------------Fim exitParametroMeth_decl---------------------");
-		System.out.println();
-		System.out.println();
 	}
 
 	@Override
 
 	public void enterBlock(DecafParser.BlockContext ctx) {
-		System.out.println("---------------------Inicio enterBlock------------------");
 		LocalScope l = new LocalScope(currentScope);
 		saveScope(ctx, currentScope);
 
-		// pushScope(l);
-		System.out.println();
-		System.out.println("---------------------Fim enterBlock--------------------");
-		System.out.println();
-		System.out.println();
+		 pushScope(l);
 	}
 
 	@Override
 
 	public void exitBlock(DecafParser.BlockContext ctx) {
-		System.out.println("---------------------Inicio exitBlock------------------");
-		// popScope();
-		System.out.println();
-		System.out.println("---------------------Fim exitBlock---------------------");
-		System.out.println();
-		System.out.println();
+		 popScope();
 	}
 
 	@Override
 
 	public void enterField_decl(DecafParser.Field_declContext ctx) {
-		System.out.println("---------------------Inicio enterField_decl---------------------");
 
 		// Verifica se e um array e se e valido
 		if (ctx.ECOLC().size() > 0 && ctx.DCOLC().size() > 0) {// se maior que zero e um array
@@ -319,29 +247,15 @@ public class DecafSymbolsAndScopes extends DecafParserBaseListener {
 
 		listaDeSimboloGeral.add(new DecafSymbol(nome, tipo, scopo));
 
-		System.out.println();
-		System.out.println("---------------------Fim enterField_decl------------------");
-		System.out.println();
-		System.out.println();
 	}
 
 	@Override
 
 	public void exitField_decl(DecafParser.Field_declContext ctx) {
-		System.out.println("---------------------Inicio exitField_decl---------------------");
-		String name = ctx.ID().get(0).getSymbol().getText();
-
-		System.out.println();
-		System.out.println("---------------------Fim exitField_decl---------------------");
-		System.out.println();
-		System.out.println();
 	}
 
 	@Override
 	public void enterVar_decl(Var_declContext ctx) {
-		System.out.println("---------------------Inicio enterVar_decl------------------");
-
-		System.out.println();
 
 		String nome = ctx.ID().get(0).getText();
 		Type tipo = null;
@@ -349,8 +263,9 @@ public class DecafSymbolsAndScopes extends DecafParserBaseListener {
 			tipo = this.getType(ctx.start.getText());
 		} else {
 			// Criar exp
-			System.out.println("Tipo var invalido");
 		}
+		
+		
 		Scope scopo = currentScope;
 
 		VariableSymbol var = new VariableSymbol(nome);
@@ -359,508 +274,286 @@ public class DecafSymbolsAndScopes extends DecafParserBaseListener {
 		currentScope.define(var); // Define symbol in current scope*/
 
 		listaDeSimboloGeral.add(new DecafSymbol(nome, tipo, scopo));
-		System.out.println();
-		System.out.println("---------------------Fim enterVar_decl---------------------");
-		System.out.println();
-		System.out.println();
 	}
 
 	@Override
 	public void exitVar_decl(Var_declContext ctx) {
-		System.out.println("---------------------Inicio exitVar_decl------------------");
-
-		System.out.println();
-		System.out.println("---------------------Fim exitVar_decl---------------------");
-		System.out.println();
-		System.out.println();
 	}
 
 	@Override
 	public void enterStatement(StatementContext ctx) {
-		System.out.println("---------------------Inicio enterStatement------------------");
-
-		/*boolean aux = true;
-		boolean aux1 = false;
-		Scope escopoAUX = null;
-
 		
-		// realiza se statemant e var = exp;
-		if (ctx.location() != null) {
-			System.out.println("ERRO TA AQUI 1");
-			// vefica se tem variavel no scopo atual
-			for (Symbol s : currentScope.getAllSymbols()) {
-				if (s.getName().equals(ctx.location().start.getText())) {
-					aux = false;
-					aux1 = true;
-					escopoAUX = currentScope;
-					System.out.println(ctx.location().start.getText() + " Esta no escopo atual");
-					break;
-				}
-			}
-			// verifica se esta no global
-			if (aux) {
-				for (Symbol sG : globals.getAllSymbols()) {
-					if (sG.getName().equals(ctx.location().start.getText())) {
-						aux1 = true;
-						escopoAUX = globals;
-						System.out.println(ctx.location().start.getText() + " Esta no escopo global");
-						break;
-					}
-				}
-			}
-			if (aux1) {
-				for (DecafSymbol a : listaDeSimboloGeral) {
-					if (a.getName().equals(ctx.location().start.getText()) && a.getScopo().equals(escopoAUX)) {
-
-						if (ctx.expr(0).location() != null) {
-
-							if (!a.getTipo().getName().equals(this.getType(ctx.expr(0).start.getType()).getName())) {
-								// Criar exp
-								System.out.println("NAO E DO MSM TIPO");
-								System.exit(0);
-							}
-						} else {
-							
-							System.out.println("ERRO TA AQUI 2");
-							if (ctx.expr(0).EXCAMACAO() != null) {
-								DecafSymbol tipoOP = new DecafSymbol(ctx.expr(0).expr(0).start.getText(), null, null);
-
-								if (ctx.expr(0).expr(0).start.getType() == 28) {
-									// se OP for id
-
-									boolean auxOP = true;
-									for (Symbol s : currentScope.getAllSymbols()) {
-										if (s.getName().equals(ctx.expr(0).expr(0).start.getText())) {
-
-											auxOP = false;
-
-											for (DecafSymbol b : listaDeSimboloGeral) {
-												if (b.getName().equals(ctx.expr(0).expr(0).start.getText())
-														&& b.getScopo().equals(currentScope)) {
-													tipoOP.setTipo(b.getTipo());
-													break;
-												}
-											}
-
-											break;
-										}
-									}
-									// verifica se esta no global
-									if (auxOP) {
-										for (Symbol sG : globals.getAllSymbols()) {
-											if (sG.getName().equals(ctx.expr(0).expr(0).start.getText())) {
-												for (DecafSymbol b : listaDeSimboloGeral) {
-													if (b.getName().equals(ctx.expr(0).expr(0).start.getText())
-															&& b.getScopo().equals(globals)) {
-														tipoOP.setTipo(b.getTipo());
-														break;
-													}
-												}
-												break;
-											}
-										}
-									}
-								}
-
-								if (tipoOP.getTipo() == null) {
-									if (ctx.expr(0).expr(0).start.getType() != 24) {
-										// Criar exp
-										System.out.println("operand of ! must be boolean");
-										System.exit(0);
-									}
-								} else {
-									if (ctx.expr(0).expr(0).start.getType() != 24
-											&& !tipoOP.getTipo().getName().equals("boolean")) {
-										// Criar exp
-										System.out.println("operand of ! must be boolean");
-										System.exit(0);
-									}
-								}
-
-							} else {
-								System.out.println("ERRO TA AQUI 3");
-								
-								
-								if(ctx.assing_op() != null && ctx.assing_op().start.getType() != 10) {
-									
-									if(ctx.expr(0).start.getType() != 29) {
-										// Criar exp
-										System.out.println("lhs and rhs of += must be int");
-										System.exit(0);
-									}
-								}else {
-									System.out.println("ERRO TA AQUI 4");
-									System.out.println(ctx.expr(0).getText());
-									
-									
-									if(ctx.expr(0).expr(0) != null) {
-										if (!a.getTipo().getName().equals(retornaTipoExpr(ctx.expr(0)).getName())) {
-											// Criar exp
-											System.out.println("EXP NAO E DO MSM TIPO DA VARIAVEL");
-											System.exit(0);
-										}
-									}
-									
-									
-									
-									
-								}
-								
-
-							}
-						}
-					}
-				}
-			}
+		//verifica se e t1 location assing_op expr PONTVIRGULA
+		if(ctx.location() != null) {
+			trataLocation(ctx);
+		}
+		
+		//method_call PONTVIRGULA
+		if(ctx.method_call() != null) {
+			trataMethCall(ctx);
+		}
+		
+		//IF EPAR expr DPAR block (ELSE block)?
+		if(ctx.IF() != null) {
+			trataIF(ctx);
+		}
+		
+		//FOR ID ATRIB expr VIRGULA expr block
+		if(ctx.FOR() != null) {
+			trataFOR(ctx);
+		}
+		
+		//RETURN (expr)? PONTVIRGULA
+		if(ctx.RETURN() != null) {
+			trataRETURN(ctx, ultMethDecl);
 		}
 
-		// verifica se statement e if
-		if (ctx.IF() != null) {
-			aux = true;
-			aux1 = false;
-			// System.out.println(this.getType(ctx.expr(0).location().ID().getText()).getName());
-			// Verifica se argumento do if e um valor de boolean ou var
-			boolean auxIF = false;
-			if (ctx.expr(0).location() != null) {
-				auxIF = true;
-			}
-			// se for variavel, verifica se e do tipo boolean
-			if (auxIF) { // primeiro verifica qual escopo esta a variavel
-				for (Symbol s : currentScope.getAllSymbols()) {
-					if (s.getName().equals(ctx.expr(0).location().ID().getText())) {
-						aux = false;
-						aux1 = true;
-						escopoAUX = currentScope;
-						System.out.println(ctx.expr(0).location().ID().getText() + " Esta no escopo atual");
-						break;
-					}
-				}
-				// verifica se esta no global
-				if (aux) {
-					for (Symbol sG : globals.getAllSymbols()) {
-						if (sG.getName().equals(ctx.expr(0).location().ID().getText())) {
-							aux1 = true;
-							escopoAUX = globals;
-							System.out.println(ctx.expr(0).location().ID().getText() + " Esta no escopo global");
-							break;
-						}
-					}
-				}
 
-				// Agora verifica se e do mesmo tipo
-				if (aux1) {
-					for (DecafSymbol a : listaDeSimboloGeral) {
-						if (a.getName().equals(ctx.expr(0).location().ID().getText())
-								&& a.getScopo().equals(escopoAUX)) {
-							if (a.getTipo().getName() != "boolean") {
-								// Criar exp
-								System.out.println("variavel nao e boolean");
-								System.exit(0);
-							}
-						}
-					}
-				}
-			}
-
-		}
-
-		// verifica se e um for
-		if (ctx.FOR() != null) {
-			if (ctx.expr(0).start.getType() != 29) {
-				// Criar exp
-				System.out.println("Primeiro argumento do for nao e inteiro");
-				System.exit(0);
-			}
-		}
-		*/
-
-		System.out.println();
-		System.out.println("---------------------Fim enterStatement---------------------");
-		System.out.println();
-		System.out.println();
 	}
 
-	private Type retornaTipoExpr(ExprContext expr) {
-
-		DecafSymbol exp1 = null;
-		DecafSymbol exp2 = null;
-		Type tipoExp = null;
-
-		if (expr.OP_RELACIO() != null || expr.OP_EQUID() != null || expr.OP_COND() != null) {
-			tipoExp = new Tipos("boolean");
+	private void trataRETURN(StatementContext ctx, String nomeMeth) {
+		// TODO Auto-generated method stub
+		//se for void nao deve ter retorno
+		for(DecafSymbol a : listaDeSimboloGeral) {
+			
+			if(a.getName().equals(nomeMeth)) {
+				if(a.getTipo().getName().equals("void")) {
+					try {
+						throw new RetornoMetodoException(a.getName());
+					} catch (RetornoMetodoException e) {
+						System.out.println(e.toString());
+						System.exit(0);
+					}
+				}
+			}
 		}
-		if (expr.OP_ARITH() != null || expr.MAIS() != null || expr.MENOS() != null) {
-			tipoExp = new Tipos("int");
-		}
-
-		if (expr.expr(0).location() != null) {
-			exp1 = new DecafSymbol(expr.expr(0).location().getText(),
-					this.getType(expr.expr(0).location().start.getType()), null);
-		} else {
-			exp1 = new DecafSymbol(expr.expr(0).getText(), this.getType(expr.expr(0).start.getType()), null);
-		}
-		if (expr.expr(1).location() != null) {
-			exp2 = new DecafSymbol(expr.expr(1).location().getText(),
-					this.getType(expr.expr(1).location().start.getType()), null);
-		} else {
-			exp2 = new DecafSymbol(expr.expr(1).getText(), this.getType(expr.expr(1).start.getType()), null);
-		}
-
+		
 		boolean aux = true;
-
-		if (exp1.getTipo().getName() == "var") {
-			for (Symbol s : currentScope.getAllSymbols()) {
-				if (s.getName().equals(exp1.getName())) {
-					aux = false;
-
-					for (DecafSymbol a : listaDeSimboloGeral) {
-						if (a.getName().equals(exp1.getName()) && a.getScopo().equals(currentScope)) {
-							exp1.setTipo(a.getTipo());
-							break;
-						}
-					}
-					break;
-				}
-			}
-			// verifica se esta no global
-			if (aux) {
-				for (Symbol sG : globals.getAllSymbols()) {
-					if (sG.getName().equals(exp1.getName())) {
-						for (DecafSymbol a : listaDeSimboloGeral) {
-							if (a.getName().equals(exp1.getName()) && a.getScopo().equals(globals)) {
-								exp1.setTipo(a.getTipo());
-								break;
-							}
-						}
-						break;
-					}
-				}
-			}
-		}
-
-		if (exp2.getTipo().getName() == "var") {
-			for (Symbol s : currentScope.getAllSymbols()) {
-				if (s.getName().equals(exp2.getName())) {
-					aux = false;
-
-					for (DecafSymbol a : listaDeSimboloGeral) {
-						if (a.getName().equals(exp2.getName()) && a.getScopo().equals(currentScope)) {
-							exp1.setTipo(a.getTipo());
-							break;
-						}
-					}
-					break;
-				}
-			}
-			// verifica se esta no global
-			if (aux) {
-				for (Symbol sG : globals.getAllSymbols()) {
-					if (sG.getName().equals(exp2.getName())) {
-						for (DecafSymbol a : listaDeSimboloGeral) {
-							if (a.getName().equals(exp2.getName()) && a.getScopo().equals(globals)) {
-								exp2.setTipo(a.getTipo());
-								break;
-							}
-						}
-						break;
-					}
-				}
-			}
-		}
-
-		if (expr.OP_RELACIO() != null || expr.OP_EQUID() != null) {
-			if (!exp1.getTipo().getName().equals("int")) {
-				// Criar exp
-				System.out.println("tipo errado para expressao booleana");
-				System.exit(0);
-
-			}
-			if (!exp2.getTipo().getName().equals("int")) {
-				// Criar exp
-				System.out.println("tipo errado para expressao booleana");
-				System.exit(0);
-			}
-		}
-
-		/*
-		 * System.out.println("nome exp1: " + exp1.getName());
-		 * System.out.println("nome exp1: " + exp1.getTipo().getName());
-		 * 
-		 * System.out.println("nome exp2: " + exp2.getName());
-		 * System.out.println("nome exp2: " + exp2.getTipo().getName());
-		 */
-		return tipoExp;
-	}
-
-	@Override
-	public void exitStatement(StatementContext ctx) {
-		System.out.println("---------------------Inicio exitStatement------------------");
-		System.out.println();
-		System.out.println("---------------------Fim exitStatement---------------------");
-		System.out.println();
-		System.out.println();
-	}
-
-	@Override
-	public void enterAssing_op(Assing_opContext ctx) {
-		System.out.println("---------------------Inicio enterAssing_op------------------");
-		System.out.println();
-		System.out.println("---------------------Fim enterAssing_op---------------------");
-		System.out.println();
-		System.out.println();
-	}
-
-	@Override
-	public void exitAssing_op(Assing_opContext ctx) {
-		System.out.println("---------------------Inicio exitAssing_op------------------");
-		System.out.println();
-		System.out.println("---------------------Fim exitAssing_op---------------------");
-		System.out.println();
-		System.out.println();
-	}
-
-	@Override
-	public void enterMethod_call(Method_callContext ctx) {
-		System.out.println("---------------------Inicio enterMethod_call------------------");
-
-		// Verifica se cumpre tds os argumento do metodo
-		for (DecafSymbol i : listaDeSimboloGeral) {
-			if (i.getScopo().getName().equals(ctx.ID().getText())) {
-				if (i.getScopo().getNumberOfSymbols() > ctx.expr().size()) {
-					try {
-						throw new NumeroDeArgumentosMetodoInvalidoException(i.getScopo().getName(), "menor");
-					} catch (NumeroDeArgumentosMetodoInvalidoException e) {
-						// TODO Auto-generated catch block
-						System.out.println(e.toString());
-						System.exit(0);
-					}
-				} else if (i.getScopo().getNumberOfSymbols() < ctx.expr().size()) {
-					try {
-						throw new NumeroDeArgumentosMetodoInvalidoException(i.getScopo().getName(), "maior");
-					} catch (NumeroDeArgumentosMetodoInvalidoException e) {
-						// TODO Auto-generated catch block
-						System.out.println(e.toString());
-						System.exit(0);
-					}
-				}
-
-			}
-		}
-
-		// Verifica tipos dos argumentos
-		System.out.println();
-		for (DecafSymbol i : listaDeSimboloGeral) {
-			if (i.getScopo().getName().equals(ctx.ID().getText())) {
-				for (int x = 0; x < i.getScopo().getSymbols().size(); x++) {
-					for (DecafSymbol a : listaDeSimboloGeral) {
-						if (i.getScopo().getSymbols().get(x).getName().equals(a.getName())) {
-							if (!a.getTipo().getName()
-									.equals(this.getType(ctx.expr(x).getStart().getType()).getName())) {
-
-								try {
-									throw new TipoDeArgumentosMetodoInvalidoException(
-											this.getType(ctx.expr(x).getStart().getType()).getName(),
-											i.getScopo().getSymbols().get(x).getName(), a.getTipo().getName(),
-											i.getScopo().getName());
-								} catch (TipoDeArgumentosMetodoInvalidoException e) {
-									System.out.println(e.toString());
-									System.exit(0);
-								}
-
-							}
-							break;
-						}
-					}
-				}
-				break;
-			}
-		}
-
-		System.out.println();
-
-		System.out.println();
-		System.out.println("---------------------Fim enterMethod_call---------------------");
-		System.out.println();
-		System.out.println();
-	}
-
-	@Override
-	public void exitMethod_call(Method_callContext ctx) {
-		System.out.println("---------------------Inicio exitMethod_call------------------");
-		System.out.println();
-		System.out.println("---------------------Fim exitMethod_call---------------------");
-		System.out.println();
-		System.out.println();
-	}
-
-	@Override
-	public void enterLocation(LocationContext ctx) {
-		System.out.println("---------------------Inicio enterLocation------------------");
-/*
-		// verificacao de variavel valida
-		if (currentScope.getSymbol(ctx.ID().getText()) == null
-				&& currentScope.getEnclosingScope().getSymbol(ctx.ID().getText()) == null) {
-			try {
-				throw new VariavelNaoInstanciadaException(ctx.ID().getText());
-			} catch (VariavelNaoInstanciadaException e) {
-				// TODO Auto-generated catch block
-				System.out.println(e.toString());
-				System.exit(0);
-			}
-
-		}
-
-		if (!(ctx.ECOLC() == null) && !(ctx.DCOLC() == null)) {// se maior que zero e um array
-			// verifica se tamanho p array e valido
-			if ((ctx.expr().start.getType() != DecafParser.INTLITERAL)
-					|| (Integer.parseInt(ctx.expr().start.getText()) < 1)) {
+		
+		DecafSymbol func = retornaSimbolo(nomeMeth);
+		//se for algum tipo verifica se retorno e do tipo instanciado p metodo
+		if(ctx.expr(0).location() != null) {
+			//tem que retornar simbolo
+			DecafSymbol var = retornaSimbolo(ctx.expr(0).location().ID().getText());
+			
+			
+			
+			if(!var.getTipo().getName().equals(func.getTipo().getName())) {
 				try {
-					throw new ArrayNaoValidoException(ctx.ID().getText());
-				} catch (ArrayNaoValidoException e) {
-					// TODO Auto-generated catch block
+					throw new RetornoMetodoException(func.getName());
+				} catch (RetornoMetodoException e) {
 					System.out.println(e.toString());
 					System.exit(0);
 				}
 			}
-		}*/
+			aux = !aux;
+		}
+		
+		if(ctx.expr(0).MENOS() != null) {
+			if(!this.getType(ctx.expr(0).expr(0).start.getType()).getName().equals(func.getTipo().getName())) {
+				try {
+					throw new RetornoMetodoException(func.getName());
+				} catch (RetornoMetodoException e) {
+					System.out.println(e.toString());
+					System.exit(0);
+				}
+			}
+			
+			aux = !aux;
+		}
+		
+		if(aux) {
+			if(!this.getType(ctx.expr(0).start.getType()).getName().equals(func.getTipo().getName())) {
+				try {
+					throw new RetornoMetodoException(func.getName());
+				} catch (RetornoMetodoException e) {
+					System.out.println(e.toString());
+					System.exit(0);
+				}
+			}
+		}
+		
+	}
 
-		System.out.println();
-		System.out.println("---------------------Fim enterLocation---------------------");
-		System.out.println();
-		System.out.println();
+	private void trataFOR(StatementContext ctx) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void trataIF(StatementContext ctx) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void trataMethCall(StatementContext ctx) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void trataLocation(StatementContext ctx) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	
+
+	@Override
+	public void exitStatement(StatementContext ctx) {
+	}
+
+	@Override
+	public void enterAssing_op(Assing_opContext ctx) {
+	}
+
+	@Override
+	public void exitAssing_op(Assing_opContext ctx) {
+	}
+
+	@Override
+	public void enterMethod_call(Method_callContext ctx) {
+		
+		if(ctx.CALLOUT() != null) {
+			
+		}else {
+			
+			
+			
+			// Verifica se cumpre tds os argumento do metodo
+			for (DecafSymbol i : listaDeSimboloGeral) {
+				if (i.getScopo().getName().equals(ctx.ID().getText())) {
+					if (i.getScopo().getNumberOfSymbols() > ctx.expr().size()) {
+						try {
+							throw new NumeroDeArgumentosMetodoInvalidoException(i.getScopo().getName(), "menor");
+						} catch (NumeroDeArgumentosMetodoInvalidoException e) {
+							// TODO Auto-generated catch block
+							System.out.println(e.toString());
+							System.exit(0);
+						}
+					} else if (i.getScopo().getNumberOfSymbols() < ctx.expr().size()) {
+						try {
+							throw new NumeroDeArgumentosMetodoInvalidoException(i.getScopo().getName(), "maior");
+						} catch (NumeroDeArgumentosMetodoInvalidoException e) {
+							// TODO Auto-generated catch block
+							System.out.println(e.toString());
+							System.exit(0);
+						}
+					}
+
+				}
+			}
+
+			// Verifica tipos dos argumentos
+			System.out.println();
+			for (DecafSymbol i : listaDeSimboloGeral) {
+				if (i.getScopo().getName().equals(ctx.ID().getText())) {
+					for (int x = 0; x < i.getScopo().getSymbols().size(); x++) {
+						for (DecafSymbol a : listaDeSimboloGeral) {
+							if (i.getScopo().getSymbols().get(x).getName().equals(a.getName())) {
+								
+								if(ctx.expr(x).location() != null) {
+									DecafSymbol v = retornaSimbolo(ctx.expr(x).location().ID().getText());
+									
+									if (!a.getTipo().getName()
+											.equals(v.getTipo().getName())) {
+
+										try {
+											throw new TipoDeArgumentosMetodoInvalidoException(
+													v.getTipo().getName(),
+													i.getScopo().getSymbols().get(x).getName(), a.getTipo().getName(),
+													i.getScopo().getName());
+										} catch (TipoDeArgumentosMetodoInvalidoException e) {
+											System.out.println(e.toString());
+											System.exit(0);
+										}
+
+									}
+								}else {
+									if (!a.getTipo().getName()
+											.equals(this.getType(ctx.expr(x).getStart().getType()).getName())) {
+
+										try {
+											throw new TipoDeArgumentosMetodoInvalidoException(
+													this.getType(ctx.expr(x).getStart().getType()).getName(),
+													i.getScopo().getSymbols().get(x).getName(), a.getTipo().getName(),
+													i.getScopo().getName());
+										} catch (TipoDeArgumentosMetodoInvalidoException e) {
+											System.out.println(e.toString());
+											System.exit(0);
+										}
+
+									}
+								}
+								
+								break;
+							}
+						}
+					}
+					break;
+				}
+			}
+		}
+
+		
+
+	}
+
+	@Override
+	public void exitMethod_call(Method_callContext ctx) {
+	}
+
+	@Override
+	public void enterLocation(LocationContext ctx) {
+		
+		//verifica se variavel existe
+		retornaSimbolo(ctx.ID().getText());
+		
+
+
+		if (!(ctx.ECOLC() == null) && !(ctx.DCOLC() == null)) {// se maior que zero e um array
+			// verifica se tamanho p array e valido
+			
+			if(ctx.expr().start.getType() == 28) {
+				DecafSymbol aux = retornaSimbolo(ctx.expr().getText());
+				if (!aux.getTipo().getName().equals("int")) {
+					try {
+						throw new ArrayNaoValidoException(ctx.ID().getText());
+					} catch (ArrayNaoValidoException e) {
+						// TODO Auto-generated catch block
+						System.out.println(e.toString());
+						System.exit(0);
+					}
+				}
+			}else {
+				if ((ctx.expr().start.getType() != DecafParser.INTLITERAL)
+						|| (Integer.parseInt(ctx.expr().start.getText()) < 1)) {
+					try {
+						throw new ArrayNaoValidoException(ctx.ID().getText());
+					} catch (ArrayNaoValidoException e) {
+						// TODO Auto-generated catch block
+						System.out.println(e.toString());
+						System.exit(0);
+					}
+				}
+			}
+			
+		}
+
 	}
 
 	@Override
 	public void exitLocation(LocationContext ctx) {
-		System.out.println("---------------------Inicio exitLocation------------------");
-		System.out.println();
-		System.out.println("---------------------Fim exitLocation---------------------");
-		System.out.println();
-		System.out.println();
 	}
 
 	@Override
 	public void enterExpr(ExprContext ctx) {
-		System.out.println("---------------------Inicio enterExpr------------------");
-
-		System.out.println(ctx.start.getType());
-
-		System.out.println();
-		System.out.println("---------------------Fim enterExpr---------------------");
-		System.out.println();
-		System.out.println();
 	}
 
 	@Override
 	public void exitExpr(ExprContext ctx) {
-		System.out.println("---------------------Inicio exitExpr------------------");
-
-		System.out.println();
-		System.out.println("---------------------Fim exitExpr---------------------");
-		System.out.println();
-		System.out.println();
 	}
 
+	
+	
 	/**
 	 * 
 	 * Método que atuliza o escopo para o atual e imprime o valor

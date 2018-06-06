@@ -30,6 +30,18 @@ public class DecafSymbol {
 	public void setScopo(Scope scopo) {
 		this.scopo = scopo;
 	}
+	
+	public String displaySimb() {
+		String retorno = "";
+		
+		retorno = "Nome var = " + name + " \n"
+				+ "Tipo var = " + tipo.getName() + " \n"
+				+ "Escopo var = " + scopo.getName() + " \n";
+		
+		
+		return retorno;
+		
+	}
 	private String name;
 	private Type tipo;
 	private Scope scopo;
